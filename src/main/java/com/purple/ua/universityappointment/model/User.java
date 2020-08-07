@@ -6,13 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.time.LocalDate;
 import java.util.List;
@@ -50,12 +48,13 @@ public class User {
     private String roles;
 
     @OneToMany(/*cascade = CascadeType.ALL,*/mappedBy = "lecturer")
+    @JsonBackReference(value = "lesson")
     private List<Lesson> lessons;
 
     @OneToMany(mappedBy = "student")
+    @JsonBackReference(value = "appointment")
     private List<Appointment> appointments;
 
     private boolean isEnabled;
-
 
 }

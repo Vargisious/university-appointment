@@ -1,6 +1,7 @@
 package com.purple.ua.universityappointment.repository;
 
 import com.purple.ua.universityappointment.model.Appointment;
+import com.purple.ua.universityappointment.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,5 +21,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findTimeOverlap(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate,
                                       @Param("lessonId") Long lessonId);
 
-    List<Appointment> getAllByStudentId(long id);
+    List<Appointment> getAllByStudent(User user);
+
+    List<Appointment> getAllByLessonLecturer(User user);
+
+    List<Appointment> getAllByLessonId(long id);
+
+
 }

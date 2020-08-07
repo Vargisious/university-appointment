@@ -1,20 +1,19 @@
 package com.purple.ua.universityappointment.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import java.sql.Time;
 import java.time.LocalDateTime;
 
 @Getter
@@ -31,16 +30,18 @@ public class Appointment {
     @ManyToOne(/*cascade = {CascadeType.DETACH,
             CascadeType.MERGE,
             CascadeType.PERSIST,
-            CascadeType.REFRESH}*/)
+            CascadeType.REFRESH}*/fetch = FetchType.EAGER)
     @JoinColumn(name = "lesson_id")
+    @JsonManagedReference(value = "forLesson")
     private Lesson lesson;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
+    @JsonManagedReference(value = "appointment")
     private User student;
 
-    @Column(name = "available")
-    private boolean available;
+    @Column(name = "status")
+    private Status status;
 
     @Column(name = "date_from")
     private LocalDateTime fromDate;

@@ -1,20 +1,9 @@
 package com.purple.ua.universityappointment.dto;
 
-import com.purple.ua.universityappointment.model.Appointment;
-import com.purple.ua.universityappointment.model.Lesson;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
@@ -23,9 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+
 public class UserDto {
 
     private Long id;

@@ -1,15 +1,14 @@
 package com.purple.ua.universityappointment.service;
 
+import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
 
-    Optional<com.purple.ua.universityappointment.model.User> getUserById(Long id);
+    User getUserById(Long id) throws UserNotFoundException;
 
-    Optional<User> getUserByLogin(String login);
 
     List<User> getAllLecturers();
 
@@ -21,5 +20,6 @@ public interface UserService {
 
     User updateUser(User user);
 
-    User deleteUser(User user);
+    User deleteUserById(long  id) throws UserNotFoundException;
+
 }

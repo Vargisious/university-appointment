@@ -1,21 +1,26 @@
 package com.purple.ua.universityappointment.service;
 
 import com.purple.ua.universityappointment.model.Appointment;
+import com.purple.ua.universityappointment.model.Status;
+import com.purple.ua.universityappointment.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AppointmentService {
 
-    List<Appointment> getAllAppointments();
+    Appointment createAppointment(Appointment appointment, User user);
 
-    List<Appointment> getAllAppointmentsByLecturerFirstNameAndLastName(String firstName, String lastName);
-
-    Appointment createAppointment(Appointment appointment);
+    Optional<Appointment> getAppointmentById(long id);
 
     Appointment updateAppointment(Appointment appointment);
 
-    Appointment deleteAppointment(Appointment appointment);
+    Appointment deleteAppointmentById(long id );
 
-    List<Appointment> getAllByStudentId(long id);
+    List<Appointment> getAllByUser(User user);
+
+    List<Appointment> getAllByLessonId(long id);
+
+    Appointment updateStatus(long id, Status status);
 
 }

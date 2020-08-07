@@ -1,53 +1,49 @@
 package com.purple.ua.universityappointment.service.impl;
 
+import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.ConfirmationToken;
 import com.purple.ua.universityappointment.model.User;
 import com.purple.ua.universityappointment.repository.ConfirmationTokenRepository;
 import com.purple.ua.universityappointment.repository.UserRepository;
 import com.purple.ua.universityappointment.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.purple.ua.universityappointment.util.UserMapper.INSTANCE;
-
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private ConfirmationTokenRepository confirmationTokenRepository;
 
     @Autowired
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private EmailSenderService emailSenderService;
 
     @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
-    }
-
-    @Override
-    public Optional<User> getUserByLogin(String login) {
-        return userRepository.findByLogin(login);
+    public User getUserById(Long id) throws UserNotFoundException {
+        Optional<User> user = userRepository.findById(id);
+        return user.orElseThrow(UserNotFoundException::new);
     }
 
     @Override
     public List<User> getAllLecturers() {
-        return userRepository.findByRoles("lecturer");
+        return userRepository.findByRoles("ROLE_LECTURER");
     }
 
     @Override
     public List<User> getAllStudents() {
-        return userRepository.findByRoles("student");
+        return userRepository.findByRoles("ROLE_STUDENT");
     }
 
     @Override
@@ -72,27 +68,40 @@ public class UserServiceImpl implements UserService {
 
             confirmationTokenRepository.save(confirmationToken);
 
-            SimpleMailMessage mailMessage = new SimpleMailMessage();
-            mailMessage.setTo(user.getEmail());
-            mailMessage.setSubject("Complete Registration!");
-            mailMessage.setFrom("anotherdayofbill2017@gmail.com");
-            mailMessage.setText("To confirm your account, please click here : "
-                    + "http://localhost:8082/confirm-account?token=" + confirmationToken.getConfirmationToken());
+            emailSenderService.mailInput(user.getEmail(), "Complete Registration!"
+                    , "anotherdayofbill2017@gmail.com", "To confirm your account, please click here : "
+                            + "http://localhost:8080/user/confirm-account?token="
+                            + confirmationToken.getConfirmationToken());
 
-            emailSenderService.sendEmail(mailMessage);
             return save;
         }
     }
 
     @Override
     public User updateUser(User user) {
-        userRepository.save(user);
-        return user;
+        UserServiceImpl userService = new UserServiceImpl();
+        User ensured = userService.userNameAndPasswordEnsure(user);
+        return userRepository.save(ensured);
     }
 
+
     @Override
-    public User deleteUser(User user) {
-        userRepository.delete(user);
+    public User deleteUserById(long id) throws UserNotFoundException {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            confirmationTokenRepository.deleteByUserId(id);
+            userRepository.deleteById(id);
+            return user.get();
+        } else {
+            throw new UserNotFoundException();
+        }
+
+    }
+
+    public User userNameAndPasswordEnsure(User user) {
+        User oldUser = userRepository.findById(user.getId()).get();
+        user.setLogin(oldUser.getLogin());
+        user.setEmail(oldUser.getEmail());
         return user;
     }
 }

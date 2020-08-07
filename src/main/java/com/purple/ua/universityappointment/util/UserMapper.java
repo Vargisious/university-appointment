@@ -2,19 +2,20 @@ package com.purple.ua.universityappointment.util;
 
 import com.purple.ua.universityappointment.dto.UserDto;
 import com.purple.ua.universityappointment.model.User;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UserMapper {
 
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    UserDto entityToDto(User userEntity);
+    UserDto toDto(User userEntity, @Context CycleAvoidingMappingContext context);
 
-    List<UserDto> entitiesToDto(List<User> userEntities);
+    List<UserDto> listToDto(List<User> userEntities, @Context CycleAvoidingMappingContext context);
 
-    User dtoToEntity(UserDto userDto);
+    User toEntity(UserDto userDto);
 }
