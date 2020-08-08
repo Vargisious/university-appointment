@@ -1,10 +1,8 @@
 package com.purple.ua.universityappointment.controller;
 
 import com.purple.ua.universityappointment.dto.LessonDto;
-import com.purple.ua.universityappointment.model.Lesson;
 import com.purple.ua.universityappointment.security.MyUserDetails;
 import com.purple.ua.universityappointment.service.LessonService;
-import com.purple.ua.universityappointment.util.CycleAvoidingMappingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static com.purple.ua.universityappointment.util.LessonMapper.INSTANCE;
-
 @RestController
-@RequestMapping("lesson")
+@RequestMapping("/lesson")
 public class LessonController {
 
     @Autowired
@@ -32,50 +28,49 @@ public class LessonController {
 
     @PreAuthorize("hasRole('ROLE_LECTURER')")
     @GetMapping("/all")
-    ResponseEntity<List<Lesson>> getAllLessons(@AuthenticationPrincipal MyUserDetails userDetails) {
-        List<Lesson> allLessons = lessonService.getAllLesson(userDetails.getUser());
-        return new ResponseEntity(allLessons, HttpStatus.OK);
+    ResponseEntity<List<LessonDto>> getAllLessons(@AuthenticationPrincipal MyUserDetails userDetails) {
+        List<LessonDto> lessons = lessonService.getAllLesson(userDetails.getUser());
+        return new ResponseEntity<>(lessons, HttpStatus.OK);
     }
 
     @GetMapping
     ResponseEntity<LessonDto> getLessonById(@RequestParam long id) {
-        Lesson lesson = lessonService.getLessonById(id);
-        return new ResponseEntity<>(INSTANCE.toDto(lesson, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        LessonDto lesson = lessonService.getLessonById(id);
+        return new ResponseEntity<>(lesson, HttpStatus.OK);
     }
 
     @GetMapping("/lecturer")
     ResponseEntity<List<LessonDto>> getLessonsByLecturerId(@RequestParam long id) {
-        List<Lesson> lessons = lessonService.getLessonsByLecturerId(id);
-        return new ResponseEntity<>(INSTANCE.listToDto(lessons, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        List<LessonDto> lessons = lessonService.getLessonsByLecturerId(id);
+        return new ResponseEntity<>(lessons, HttpStatus.OK);
     }
 
     @GetMapping("/lecturer/name")
     ResponseEntity<List<LessonDto>> getLessonsByLecturerFirstAndLastName(@RequestParam String firstName, @RequestParam String lastName) {
-        List<Lesson> lessons = lessonService.getLessonsByLecturerFirstNameAndLastName(firstName, lastName);
-        return new ResponseEntity<>(INSTANCE.listToDto(lessons, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        List<LessonDto> lessons = lessonService.getLessonsByLecturerFirstNameAndLastName(firstName, lastName);
+        return new ResponseEntity<>(lessons, HttpStatus.OK);
     }
 
 
     @PreAuthorize("hasRole('ROLE_LECTURER')")
     @PostMapping("/create")
     ResponseEntity<LessonDto> createLesson(@RequestBody LessonDto lessonDto, @AuthenticationPrincipal MyUserDetails userDetails) {
-        Lesson lesson = INSTANCE.toEntity(lessonDto);
-        lessonService.createLesson(lesson, userDetails.getUser());
-        return new ResponseEntity(INSTANCE.toDto(lesson, new CycleAvoidingMappingContext()), HttpStatus.CREATED);
+        LessonDto lesson = lessonService.createLesson(lessonDto, userDetails.getUser());
+        return new ResponseEntity<>(lesson, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('ROLE_LECTURER')")
     @PutMapping("/update")
     ResponseEntity<LessonDto> updateLesson(@RequestBody LessonDto lessonDto) {
-        Lesson lesson = lessonService.updateLesson(INSTANCE.toEntity(lessonDto));
-        return new ResponseEntity<>(INSTANCE.toDto(lesson, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        LessonDto lesson = lessonService.updateLesson(lessonDto);
+        return new ResponseEntity<>(lesson, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LECTURER')")
     @DeleteMapping("/delete")
     ResponseEntity<LessonDto> deleteLesson(@RequestParam long id) {
-        Lesson lesson = lessonService.deleteLesson(id);
-        return new ResponseEntity<>(INSTANCE.toDto(lesson, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        LessonDto lesson = lessonService.deleteLesson(id);
+        return new ResponseEntity<>(lesson, HttpStatus.OK);
     }
 }
 

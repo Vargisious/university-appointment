@@ -1,17 +1,24 @@
 package com.purple.ua.universityappointment.service.impl;
 
+import com.purple.ua.universityappointment.dto.LessonDto;
+import com.purple.ua.universityappointment.exception.LessonNotFoundException;
+import com.purple.ua.universityappointment.exception.TimeConflictException;
+import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.Lesson;
 import com.purple.ua.universityappointment.model.User;
 import com.purple.ua.universityappointment.repository.LessonRepository;
 import com.purple.ua.universityappointment.repository.UserRepository;
 import com.purple.ua.universityappointment.service.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static com.purple.ua.universityappointment.util.LessonMapper.INSTANCE;
 
 @Service
 @Transactional
@@ -24,75 +31,94 @@ public class LessonServiceImpl implements LessonService {
     UserRepository userRepository;
 
     @Override
-    public Lesson getLessonById(long id) {
+    public LessonDto getLessonById(long id) {
         Optional<Lesson> lesson = lessonRepository.findById(id);
-        return lesson.orElseThrow(() -> {
-            throw new RuntimeException(String.format("Lesson with id: " + id + "not found"));
-        });
+        return INSTANCE.toDto(lesson.orElseThrow(() ->
+                new LessonNotFoundException(HttpStatus.NOT_FOUND, "Lesson with id: " + id + " not found")));
     }
 
     @Override
-    public List<Lesson> getAllLesson(User user) {
-        return lessonRepository.findByLecturer(user);
+    public List<LessonDto> getAllLesson(User user) {
+        List<Lesson> lessons = lessonRepository.findByLecturer(user);
+        if (!lessons.isEmpty()) {
+            return INSTANCE.listToDto(lessonRepository.findByLecturer(user));
+        } else {
+            throw new LessonNotFoundException(HttpStatus.NOT_FOUND, "No lessons found");
+        }
     }
 
     @Override
-    public List<Lesson> getLessonsByLecturerFirstNameAndLastName(String firstName, String lastName) {
-        User user = userRepository.findByFirstNameAndLastName(firstName, lastName);
-        return lessonRepository.findByLecturer(user);
+    public List<LessonDto> getLessonsByLecturerFirstNameAndLastName(String firstName, String lastName) {
+        User user = userRepository.findByFirstNameAndLastName(firstName, lastName).orElseThrow(
+                () -> new UserNotFoundException(HttpStatus.NOT_FOUND, "Lecturer with first name: " + firstName +
+                        " and last name " + lastName + " not found"));
+        List<Lesson> lessons = lessonRepository.findByLecturer(user);
+        if (!lessons.isEmpty()) {
+            return INSTANCE.listToDto(lessons);
+        } else {
+            throw new LessonNotFoundException(HttpStatus.NOT_FOUND, "No lessons found");
+        }
     }
 
     @Override
-    public List<Lesson> getLessonsByLecturerId(long id) {
-        return lessonRepository.findByLecturerId(id);
+    public List<LessonDto> getLessonsByLecturerId(long id) {
+        List<Lesson> lessons = lessonRepository.findByLecturerId(id);
+        if (!lessons.isEmpty()) {
+            return INSTANCE.listToDto(lessons);
+        } else {
+            throw new LessonNotFoundException(HttpStatus.NOT_FOUND, "Lesson with lecturer id: " + id + " not found");
+        }
     }
 
     @Override
-    public Lesson getLessonByLessonName(String name) {
-        return lessonRepository.findByLessonName(name);
+    public List<LessonDto> getLessonByFieldOfStudy(String name) {
+        List<Lesson> lessons = lessonRepository.findByFieldOfStudy(name);
+        if (!lessons.isEmpty()) {
+            return INSTANCE.listToDto(lessons);
+        } else {
+            throw new LessonNotFoundException(HttpStatus.NOT_FOUND, "Lesson with field of study: " + name + " not found");
+        }
     }
 
     @Override
-    @Transactional
-    public Lesson createLesson(Lesson lesson, User user) {
-        LocalDateTime fromDate = lesson.getFromDate();
-        LocalDateTime toDate = lesson.getToDate();
+    public LessonDto createLesson(LessonDto lessonDto, User user) {
+        LocalDateTime fromDate = lessonDto.getFromDate();
+        LocalDateTime toDate = lessonDto.getToDate();
         if (!toDate.isAfter(fromDate)) {
-            throw new RuntimeException(String.format("DateFrom is after ToDate"));
+            throw new TimeConflictException(HttpStatus.CONFLICT, "DateFrom is after ToDate");
         }
         if (lessonRepository.findTimeOverlap(fromDate, toDate, user.getId()).isEmpty()) {
             User lecturer = userRepository.findById(user.getId()).get();
+            Lesson lesson = INSTANCE.toEntity(lessonDto);
             lesson.setLecturer(lecturer);
-            return lessonRepository.save(lesson);
+            return INSTANCE.toDto(lessonRepository.save(lesson));
         } else {
-            throw new RuntimeException(String.format("The date is overlapping another lesson"));
+            throw new TimeConflictException(HttpStatus.CONFLICT, "The date is overlapping another lesson");
         }
     }
 
     @Override
-    public Lesson updateLesson(Lesson lesson) {
-        LocalDateTime fromDate = lesson.getFromDate();
-        LocalDateTime toDate = lesson.getToDate();
+    public LessonDto updateLesson(LessonDto lessonDto) {
+        LocalDateTime fromDate = lessonDto.getFromDate();
+        LocalDateTime toDate = lessonDto.getToDate();
         if (!toDate.isAfter(fromDate)) {
-            throw new RuntimeException(String.format("DateFrom is after ToDate"));
+            throw new TimeConflictException(HttpStatus.CONFLICT, "DateFrom is after ToDate");
         }
-        if (lessonRepository.findTimeOverlap(fromDate, toDate, lesson.getLecturer().getId()).isEmpty()) {
-            return lessonRepository.save(lesson);
+        if (lessonRepository.findTimeOverlap(fromDate, toDate, lessonDto.getLecturer().getId()).isEmpty()) {
+            lessonRepository.save(INSTANCE.toEntity(lessonDto));
+            return lessonDto;
         } else {
-            throw new RuntimeException(String.format("The date is overlapping another lesson"));
+            throw new TimeConflictException(HttpStatus.CONFLICT, "The date is overlapping another lesson");
         }
 
     }
 
     @Override
-    public Lesson deleteLesson(long id) {
-        Optional<Lesson> lesson = lessonRepository.findById(id);
-        if (lesson.isPresent()) {
-            lessonRepository.deleteById(id);
-            return lesson.get();
-        } else {
-            throw new RuntimeException(String.format("Lesson with id: " + id + " not found"));
-
-        }
+    public LessonDto deleteLesson(long id) {
+        Lesson lesson = lessonRepository.findById(id).orElseThrow(() ->
+                new LessonNotFoundException(HttpStatus.NOT_FOUND, "Lesson with id: " + id + " not found"));
+        lessonRepository.delete(lesson);
+        return INSTANCE.toDto(lesson);
     }
 }
+

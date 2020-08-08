@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Service("MyUserDetailsService")
+@Service
 public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
@@ -19,11 +19,9 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String userLogin) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByLogin(userLogin);
-        user.orElseThrow(() -> new UsernameNotFoundException("Not found:  " + userLogin));
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+        Optional<User> user = userRepository.findByUserName(userName);
+        user.orElseThrow(() -> new UsernameNotFoundException("Not found:  " + userName));
         return user.map(MyUserDetails::new).get();
-
-//        return new User("foo","foo",new ArrayList<>());
     }
 }

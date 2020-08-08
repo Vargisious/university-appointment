@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,24 +31,22 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "lesson_name")
-    private String lessonName;
+    @Column(name = "field_of_study")
+    private String fieldOfStudy;
 
     private Timestamp createdAt = new Timestamp(System.currentTimeMillis());
 
     @Column(name = "price_per_hour")
     private int price;
 
-    @ManyToOne(/*cascade = {CascadeType.DETACH,
+    @ManyToOne( /*cascade = {CascadeType.DETACH,
             CascadeType.MERGE,
             CascadeType.PERSIST,
-            CascadeType.REFRESH}*/)
+            CascadeType.REFRESH}*/fetch = FetchType.EAGER)
     @JoinColumn(name = "lecturer_id")
-    @JsonManagedReference(value = "lesson")
     private User lecturer;
 
     @OneToMany(/*cascade = CascadeType.ALL,*/ mappedBy = "lesson")
-    @JsonBackReference(value = "forLesson")
     private List<Appointment> appointment;
 
     @Column(name = "date_from")

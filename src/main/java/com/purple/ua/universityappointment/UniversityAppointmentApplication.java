@@ -6,10 +6,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
-@SpringBootApplication
-@EnableJpaRepositories
-@EnableWebSecurity
 @EnableAsync
+@EnableWebSecurity
+@EnableJpaRepositories
+@SpringBootApplication
 public class UniversityAppointmentApplication {
 
     public static void main(String[] args) {
@@ -17,3 +17,4 @@ public class UniversityAppointmentApplication {
     }
 
 }
+

@@ -1,26 +1,26 @@
 package com.purple.ua.universityappointment.service;
 
-import com.purple.ua.universityappointment.model.Appointment;
+import com.purple.ua.universityappointment.dto.AppointmentDto;
+import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.Status;
 import com.purple.ua.universityappointment.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface AppointmentService {
 
-    Appointment createAppointment(Appointment appointment, User user);
+    AppointmentDto createAppointment(AppointmentDto appointmentDto, User user, long lessonId);
 
-    Optional<Appointment> getAppointmentById(long id);
+    AppointmentDto getAppointmentById(long id) throws UserNotFoundException;
 
-    Appointment updateAppointment(Appointment appointment);
+    AppointmentDto updateAppointment(AppointmentDto appointmentDto);
 
-    Appointment deleteAppointmentById(long id );
+    AppointmentDto deleteAppointmentById(long id );
 
-    List<Appointment> getAllByUser(User user);
+    List<AppointmentDto> getAllByUser(User user);
 
-    List<Appointment> getAllByLessonId(long id);
+    List<AppointmentDto> getAllByLessonId(long id);
 
-    Appointment updateStatus(long id, Status status);
+    AppointmentDto updateStatus(long id, Status status);
 
 }

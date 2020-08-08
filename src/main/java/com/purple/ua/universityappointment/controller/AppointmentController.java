@@ -1,12 +1,10 @@
 package com.purple.ua.universityappointment.controller;
 
 import com.purple.ua.universityappointment.dto.AppointmentDto;
-import com.purple.ua.universityappointment.model.Appointment;
+import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.Status;
 import com.purple.ua.universityappointment.security.MyUserDetails;
 import com.purple.ua.universityappointment.service.AppointmentService;
-import com.purple.ua.universityappointment.util.AppointmentMapper;
-import com.purple.ua.universityappointment.util.CycleAvoidingMappingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.purple.ua.universityappointment.util.AppointmentMapper.INSTANCE;
-
 @RestController
 @RequestMapping("/appointment")
 public class AppointmentController {
@@ -37,45 +33,46 @@ public class AppointmentController {
     @PreAuthorize("hasRole('ROLE_LECTURER')")
     @PutMapping("/status")
     ResponseEntity<AppointmentDto> approveAppointment(@RequestParam long id, @RequestParam Status status) {
-        Appointment appointment = appointmentService.updateStatus(id, status);
-        return new ResponseEntity<>(AppointmentMapper.INSTANCE.toDto(appointment, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        AppointmentDto appointment = appointmentService.updateStatus(id, status);
+        return new ResponseEntity<>(appointment, HttpStatus.OK);
     }
 
     @GetMapping("/lesson")
     ResponseEntity<List<AppointmentDto>> getAllAppointmentsByLessonId(@RequestParam long id) {
-        List<Appointment> appointments = appointmentService.getAllByLessonId(id);
-        return new ResponseEntity<>(INSTANCE.listToDto(appointments, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        List<AppointmentDto> appointments = appointmentService.getAllByLessonId(id);
+        return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 
     @GetMapping("/related")
     ResponseEntity<List<AppointmentDto>> getAllRelatedAppointments(@AuthenticationPrincipal MyUserDetails userDetails) {
-        List<Appointment> appointments = appointmentService.getAllByUser(userDetails.getUser());
-        return new ResponseEntity<>(INSTANCE.listToDto(appointments, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        List<AppointmentDto> appointments = appointmentService.getAllByUser(userDetails.getUser());
+        return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 
     @GetMapping
-    ResponseEntity<AppointmentDto> getAppointmentById(@RequestParam long id) {
-        Appointment appointment = appointmentService.getAppointmentById(id).get();
-        return new ResponseEntity<>(AppointmentMapper.INSTANCE.toDto(appointment, new CycleAvoidingMappingContext()), HttpStatus.OK);
+    ResponseEntity<AppointmentDto> getAppointmentById(@RequestParam long id) throws UserNotFoundException {
+        AppointmentDto appointment = appointmentService.getAppointmentById(id);
+        return new ResponseEntity<>(appointment, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")
     ResponseEntity<AppointmentDto> deleteAppointment(@RequestParam long id) {
-        Appointment appointment = appointmentService.deleteAppointmentById(id);
-        return new ResponseEntity<>(INSTANCE.toDto(appointment, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        AppointmentDto appointment = appointmentService.deleteAppointmentById(id);
+        return new ResponseEntity<>(appointment, HttpStatus.OK);
     }
 
     @PostMapping("/create")
-    ResponseEntity<AppointmentDto> createAppointment(@Valid @RequestBody AppointmentDto appointmentDto, @AuthenticationPrincipal MyUserDetails userDetails) {
-        Appointment appointment = INSTANCE.toEntity(appointmentDto);
-        Appointment app = appointmentService.createAppointment(appointment, userDetails.getUser());
-        return new ResponseEntity<>(INSTANCE.toDto(app, new CycleAvoidingMappingContext()), HttpStatus.CREATED);
+    ResponseEntity<AppointmentDto> createAppointment(@Valid @RequestBody AppointmentDto appointmentDto,
+                                                     @RequestParam long lessonId,
+                                                     @AuthenticationPrincipal MyUserDetails userDetails) {
+        AppointmentDto appointment = appointmentService.createAppointment(appointmentDto, userDetails.getUser(), lessonId);
+        return new ResponseEntity<>(appointment, HttpStatus.CREATED);
     }
 
     @PutMapping("/update")
     ResponseEntity<AppointmentDto> updateAppointment(@RequestBody AppointmentDto appointmentDto) {
-        Appointment appointment = appointmentService.updateAppointment(INSTANCE.toEntity(appointmentDto));
-        return new ResponseEntity<>(INSTANCE.toDto(appointment, new CycleAvoidingMappingContext()), HttpStatus.OK);
+        AppointmentDto appointment = appointmentService.updateAppointment(appointmentDto);
+        return new ResponseEntity<>(appointment, HttpStatus.OK);
     }
 
 

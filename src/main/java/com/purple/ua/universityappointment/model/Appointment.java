@@ -1,6 +1,5 @@
 package com.purple.ua.universityappointment.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,12 +31,10 @@ public class Appointment {
             CascadeType.PERSIST,
             CascadeType.REFRESH}*/fetch = FetchType.EAGER)
     @JoinColumn(name = "lesson_id")
-    @JsonManagedReference(value = "forLesson")
     private Lesson lesson;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
-    @JsonManagedReference(value = "appointment")
     private User student;
 
     @Column(name = "status")

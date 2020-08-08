@@ -19,7 +19,7 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
     List<Lesson> findByLecturer(User user);
 
-    Lesson findByLessonName(String name);
+    List<Lesson> findByFieldOfStudy(String name);
 
     List<Lesson> findByLecturerId(long id);
 
