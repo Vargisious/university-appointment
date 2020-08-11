@@ -13,9 +13,15 @@ import java.util.List;
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
-    @Query(value = "SELECT l FROM lesson_table l  WHERE l.fromDate <= :toDate AND l.toDate>= :fromDate AND l.lecturer.id = :userId")
+    @Query(value = "SELECT l FROM lesson_table l  WHERE l.fromDate <= :toDate AND l.toDate>= :fromDate AND" +
+            " l.lecturer.id = :userId")
     List<Lesson> findTimeOverlap(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate,
-                                      @Param("userId") Long userId);
+                                 @Param("userId") Long userId);
+
+    @Query(value = "SELECT l FROM lesson_table l  WHERE l.fromDate <= :toDate AND l.toDate>= :fromDate AND" +
+            " l.lecturer.id = :userId AND NOT l.id =:lessonId ")
+    List<Lesson> findTimeOverlapExclude(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate,
+                                        @Param("userId") Long userId, @Param("lessonId") long lessonId);
 
     List<Lesson> findByLecturer(User user);
 

@@ -12,16 +12,15 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-
 public class UserDto {
 
     private Long id;
 
-    @NotNull(message = "Please fill in the first name field")
+    @NotNull
     @Length(min = 2)
     private String firstName;
 
-    @NotNull(message = "Please fill in the last name field")
+    @NotNull
     @Length(min = 2)
     private String lastName;
 
@@ -29,16 +28,16 @@ public class UserDto {
             regexp = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$")
     private String email;
 
-    @NotNull(message = "Please fill in the username field")
+    @NotNull
     @Length(min = 2, message = "User name should have more than 1 character  ")
     private String userName;
 
     @Past
-    @NotNull(message = "Please fill in the birthday field")
+    @NotNull
     private LocalDate birthday;
 
-    @NotNull(message = "Please fill in the birthday field")
-    @Length(min=8,message = "Password should have more than 7 characters ")
+    @NotNull
+    @Length(min = 8)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 

@@ -3,13 +3,12 @@ package com.purple.ua.universityappointment.service.impl;
 import com.purple.ua.universityappointment.dto.LessonDto;
 import com.purple.ua.universityappointment.exception.LessonNotFoundException;
 import com.purple.ua.universityappointment.exception.TimeConflictException;
-import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.Lesson;
 import com.purple.ua.universityappointment.model.User;
 import com.purple.ua.universityappointment.repository.LessonRepository;
-import com.purple.ua.universityappointment.repository.UserRepository;
 import com.purple.ua.universityappointment.service.LessonService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.purple.ua.universityappointment.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,40 +17,33 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static com.purple.ua.universityappointment.util.LessonMapper.INSTANCE;
+import static com.purple.ua.universityappointment.util.mapper.LessonMapper.INSTANCE;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class LessonServiceImpl implements LessonService {
 
-    @Autowired
-    LessonRepository lessonRepository;
+    private final LessonRepository lessonRepository;
 
-    @Autowired
-    UserRepository userRepository;
+    private final UserService userService;
 
     @Override
-    public LessonDto getLessonById(long id) {
+    public LessonDto getLesson(long id) {
         Optional<Lesson> lesson = lessonRepository.findById(id);
         return INSTANCE.toDto(lesson.orElseThrow(() ->
                 new LessonNotFoundException(HttpStatus.NOT_FOUND, "Lesson with id: " + id + " not found")));
     }
 
     @Override
-    public List<LessonDto> getAllLesson(User user) {
-        List<Lesson> lessons = lessonRepository.findByLecturer(user);
-        if (!lessons.isEmpty()) {
-            return INSTANCE.listToDto(lessonRepository.findByLecturer(user));
-        } else {
-            throw new LessonNotFoundException(HttpStatus.NOT_FOUND, "No lessons found");
-        }
+    public Lesson getLessonById(long id) {
+        Optional<Lesson> lesson = lessonRepository.findById(id);
+        return lesson.orElseThrow(() ->
+                new LessonNotFoundException(HttpStatus.NOT_FOUND, "Lesson with id: " + id + " not found"));
     }
 
     @Override
-    public List<LessonDto> getLessonsByLecturerFirstNameAndLastName(String firstName, String lastName) {
-        User user = userRepository.findByFirstNameAndLastName(firstName, lastName).orElseThrow(
-                () -> new UserNotFoundException(HttpStatus.NOT_FOUND, "Lecturer with first name: " + firstName +
-                        " and last name " + lastName + " not found"));
+    public List<LessonDto> getAllLesson(User user) {
         List<Lesson> lessons = lessonRepository.findByLecturer(user);
         if (!lessons.isEmpty()) {
             return INSTANCE.listToDto(lessons);
@@ -88,7 +80,7 @@ public class LessonServiceImpl implements LessonService {
             throw new TimeConflictException(HttpStatus.CONFLICT, "DateFrom is after ToDate");
         }
         if (lessonRepository.findTimeOverlap(fromDate, toDate, user.getId()).isEmpty()) {
-            User lecturer = userRepository.findById(user.getId()).get();
+            User lecturer = userService.getUserById(user.getId());
             Lesson lesson = INSTANCE.toEntity(lessonDto);
             lesson.setLecturer(lecturer);
             return INSTANCE.toDto(lessonRepository.save(lesson));
@@ -98,19 +90,19 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public LessonDto updateLesson(LessonDto lessonDto) {
+    public LessonDto updateLesson(LessonDto lessonDto, User user) {
         LocalDateTime fromDate = lessonDto.getFromDate();
         LocalDateTime toDate = lessonDto.getToDate();
         if (!toDate.isAfter(fromDate)) {
             throw new TimeConflictException(HttpStatus.CONFLICT, "DateFrom is after ToDate");
         }
-        if (lessonRepository.findTimeOverlap(fromDate, toDate, lessonDto.getLecturer().getId()).isEmpty()) {
+        if (lessonRepository.findTimeOverlapExclude(fromDate, toDate, user.getId(),
+                lessonDto.getId()).isEmpty()) {
             lessonRepository.save(INSTANCE.toEntity(lessonDto));
             return lessonDto;
         } else {
             throw new TimeConflictException(HttpStatus.CONFLICT, "The date is overlapping another lesson");
         }
-
     }
 
     @Override

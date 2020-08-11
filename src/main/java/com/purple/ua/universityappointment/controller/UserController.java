@@ -4,7 +4,7 @@ import com.purple.ua.universityappointment.dto.UserDto;
 import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.security.MyUserDetails;
 import com.purple.ua.universityappointment.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,14 +21,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping("/info")
     ResponseEntity<UserDto> getUser(@AuthenticationPrincipal MyUserDetails userDetails) throws UserNotFoundException {
-        UserDto user = userService.getUserById(userDetails.getUser().getId());
+        UserDto user = userService.getUser(userDetails.getUser().getId());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

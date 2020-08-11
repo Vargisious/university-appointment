@@ -3,7 +3,7 @@ package com.purple.ua.universityappointment.controller;
 import com.purple.ua.universityappointment.dto.LessonDto;
 import com.purple.ua.universityappointment.security.MyUserDetails;
 import com.purple.ua.universityappointment.service.LessonService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,36 +21,29 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/lesson")
+@RequiredArgsConstructor
 public class LessonController {
 
-    @Autowired
-    private LessonService lessonService;
+    private final LessonService lessonService;
 
     @PreAuthorize("hasRole('ROLE_LECTURER')")
     @GetMapping("/all")
-    ResponseEntity<List<LessonDto>> getAllLessons(@AuthenticationPrincipal MyUserDetails userDetails) {
+    ResponseEntity<List<LessonDto>> getAllRelatedLessons(@AuthenticationPrincipal MyUserDetails userDetails) {
         List<LessonDto> lessons = lessonService.getAllLesson(userDetails.getUser());
         return new ResponseEntity<>(lessons, HttpStatus.OK);
     }
 
     @GetMapping
-    ResponseEntity<LessonDto> getLessonById(@RequestParam long id) {
-        LessonDto lesson = lessonService.getLessonById(id);
+    ResponseEntity<LessonDto> getLessonById(@RequestParam long lessonId) {
+        LessonDto lesson = lessonService.getLesson(lessonId);
         return new ResponseEntity<>(lesson, HttpStatus.OK);
     }
 
     @GetMapping("/lecturer")
-    ResponseEntity<List<LessonDto>> getLessonsByLecturerId(@RequestParam long id) {
-        List<LessonDto> lessons = lessonService.getLessonsByLecturerId(id);
+    ResponseEntity<List<LessonDto>> getLessonsByLecturerId(@RequestParam long lecturerId) {
+        List<LessonDto> lessons = lessonService.getLessonsByLecturerId(lecturerId);
         return new ResponseEntity<>(lessons, HttpStatus.OK);
     }
-
-    @GetMapping("/lecturer/name")
-    ResponseEntity<List<LessonDto>> getLessonsByLecturerFirstAndLastName(@RequestParam String firstName, @RequestParam String lastName) {
-        List<LessonDto> lessons = lessonService.getLessonsByLecturerFirstNameAndLastName(firstName, lastName);
-        return new ResponseEntity<>(lessons, HttpStatus.OK);
-    }
-
 
     @PreAuthorize("hasRole('ROLE_LECTURER')")
     @PostMapping("/create")
@@ -61,8 +54,8 @@ public class LessonController {
 
     @PreAuthorize("hasRole('ROLE_LECTURER')")
     @PutMapping("/update")
-    ResponseEntity<LessonDto> updateLesson(@RequestBody LessonDto lessonDto) {
-        LessonDto lesson = lessonService.updateLesson(lessonDto);
+    ResponseEntity<LessonDto> updateLesson(@RequestBody LessonDto lessonDto, @AuthenticationPrincipal MyUserDetails userDetails) {
+        LessonDto lesson = lessonService.updateLesson(lessonDto, userDetails.getUser());
         return new ResponseEntity<>(lesson, HttpStatus.OK);
     }
 

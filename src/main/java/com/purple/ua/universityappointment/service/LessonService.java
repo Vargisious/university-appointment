@@ -1,17 +1,18 @@
 package com.purple.ua.universityappointment.service;
 
 import com.purple.ua.universityappointment.dto.LessonDto;
+import com.purple.ua.universityappointment.model.Lesson;
 import com.purple.ua.universityappointment.model.User;
 
 import java.util.List;
 
 public interface LessonService {
 
-    LessonDto getLessonById(long id);
+    LessonDto getLesson(long id);
+
+    Lesson getLessonById(long id);
 
     List<LessonDto> getAllLesson(User user);
-
-    List<LessonDto> getLessonsByLecturerFirstNameAndLastName(String firstName, String secondName);
 
     List<LessonDto> getLessonsByLecturerId(long id);
 
@@ -19,7 +20,7 @@ public interface LessonService {
 
     LessonDto createLesson(LessonDto lessonDto, User user);
 
-    LessonDto updateLesson(LessonDto lessonDto);
+    LessonDto updateLesson(LessonDto lessonDto, User user);
 
     LessonDto deleteLesson(long id);
 

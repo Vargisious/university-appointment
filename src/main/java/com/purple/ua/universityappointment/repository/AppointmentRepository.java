@@ -18,6 +18,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findTimeOverlap(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate,
                                       @Param("lessonId") Long lessonId);
 
+
+    @Query(value = "SELECT a FROM appointment_table a WHERE a.fromDate <= :toDate AND" +
+            " a.toDate>= :fromDate AND a.lesson.id = :lessonId AND NOT a.id=:appointmentId")
+    List<Appointment> findTimeOverlapExclude(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate,
+                                             @Param("lessonId") long lessonId, @Param("appointmentId") long appointmentId);
+
     List<Appointment> getAllByStudent(User user);
 
     List<Appointment> getAllByLessonId(long id);

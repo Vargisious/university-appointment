@@ -1,4 +1,4 @@
-package com.purple.ua.universityappointment.util;
+package com.purple.ua.universityappointment.util.mapper;
 
 
 import com.purple.ua.universityappointment.dto.AppointmentDto;

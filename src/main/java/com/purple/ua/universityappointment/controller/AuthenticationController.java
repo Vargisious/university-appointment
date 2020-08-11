@@ -7,29 +7,28 @@ import com.purple.ua.universityappointment.repository.UserRepository;
 import com.purple.ua.universityappointment.security.AuthenticationService;
 import com.purple.ua.universityappointment.security.model.AuthenticationRequest;
 import com.purple.ua.universityappointment.security.model.AuthenticationResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
 
 @RestController
+@RequiredArgsConstructor
 public class AuthenticationController {
 
-    @Autowired
-    AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private final ConfirmationTokenRepository confirmationTokenRepository;
+
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> createAuthenticationToken(
@@ -38,7 +37,7 @@ public class AuthenticationController {
                 HttpStatus.OK);
     }
 
-    @GetMapping("/confirm-account")
+    @PostMapping ("/confirm-account")
     public ResponseEntity<String> confirmUserAccount(@RequestParam("token") String confirmationToken) throws Exception {
         ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
 
@@ -48,7 +47,7 @@ public class AuthenticationController {
             user.setEnabled(true);
             userRepository.save(user);
         } else {
-            throw new Exception(String.format("Link is broken"));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Link is Broken");
         }
 
         return new ResponseEntity<>("Email confirmed", HttpStatus.OK);

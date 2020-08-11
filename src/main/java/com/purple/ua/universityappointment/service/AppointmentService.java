@@ -1,7 +1,6 @@
 package com.purple.ua.universityappointment.service;
 
 import com.purple.ua.universityappointment.dto.AppointmentDto;
-import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.Status;
 import com.purple.ua.universityappointment.model.User;
 
@@ -11,9 +10,9 @@ public interface AppointmentService {
 
     AppointmentDto createAppointment(AppointmentDto appointmentDto, User user, long lessonId);
 
-    AppointmentDto getAppointmentById(long id) throws UserNotFoundException;
+    AppointmentDto getAppointmentById(long id);
 
-    AppointmentDto updateAppointment(AppointmentDto appointmentDto);
+    AppointmentDto updateAppointment(AppointmentDto appointmentDto, long lessonId);
 
     AppointmentDto deleteAppointmentById(long id );
 

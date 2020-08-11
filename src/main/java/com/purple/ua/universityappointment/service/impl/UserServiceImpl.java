@@ -8,9 +8,9 @@ import com.purple.ua.universityappointment.model.User;
 import com.purple.ua.universityappointment.repository.ConfirmationTokenRepository;
 import com.purple.ua.universityappointment.repository.UserRepository;
 import com.purple.ua.universityappointment.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.purple.ua.universityappointment.util.MailUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,34 +18,38 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.purple.ua.universityappointment.util.UserMapper.INSTANCE;
+import static com.purple.ua.universityappointment.util.mapper.UserMapper.INSTANCE;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private final ConfirmationTokenRepository confirmationTokenRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private EmailSenderService emailSenderService;
+    private final MailUtils mailUtils;
 
     @Override
-    public UserDto getUserById(Long id) throws UserNotFoundException {
+    public UserDto getUser(long id) {
         Optional<User> user = userRepository.findById(id);
         return INSTANCE.toDto(user.orElseThrow(() ->
                 new UserNotFoundException(HttpStatus.NOT_FOUND, "User with id: " + id + " not found")));
     }
 
     @Override
+    public User getUserById(long id) {
+        Optional<User> user = userRepository.findById(id);
+        return user.orElseThrow(() ->
+                new UserNotFoundException(HttpStatus.NOT_FOUND, "User with id: " + id + " not found"));
+    }
+
+    @Override
     public List<UserDto> getAllLecturers() {
-        List<User> users = userRepository.findByRoles("ROLE_LECTURER");
+        List<User> users = userRepository.findAllLecturers();
         if (!users.isEmpty()) {
             return INSTANCE.listToDto(users);
         } else {
@@ -55,7 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllStudents() {
-        List<User> users = userRepository.findByRoles("ROLE_STUDENT");
+        List<User> users = userRepository.findAllStudents();
         if (!users.isEmpty()) {
             return INSTANCE.listToDto(users);
         } else {
@@ -90,9 +94,9 @@ public class UserServiceImpl implements UserService {
 
             confirmationTokenRepository.save(confirmationToken);
 
-            mailInput(userDto.getEmail(), "Complete Registration!"
+            mailUtils.mailInput(userDto.getEmail(), "Complete Registration!"
                     , "To confirm your account, please click here : "
-                            + "http://localhost:8080/confirm-account?token="
+                            + mailUtils.getUrl() + "/confirm-account?token="
                             + confirmationToken.getConfirmationToken());
 
             return INSTANCE.toDto(save);
@@ -101,15 +105,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(UserDto userDto) {
-        UserServiceImpl userService = new UserServiceImpl();
-        User ensured = userService.userNameAndPasswordEnsure(INSTANCE.toEntity(userDto));
+        User ensured = userNameAndPasswordEnsure(INSTANCE.toEntity(userDto));
         User user = userRepository.save(ensured);
         return INSTANCE.toDto(user);
     }
 
 
     @Override
-    public UserDto deleteUserById(long id) throws UserNotFoundException {
+    public UserDto deleteUserById(long id) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(HttpStatus.NOT_FOUND, "User with id: " + id + " not found"));
         confirmationTokenRepository.deleteByUserId(id);
@@ -117,18 +120,12 @@ public class UserServiceImpl implements UserService {
         return INSTANCE.toDto(user);
     }
 
+
     public User userNameAndPasswordEnsure(User user) {
-        User oldUser = userRepository.findById(user.getId()).get();
+        User oldUser = userRepository.findById(user.getId()).orElseThrow(
+                () -> new UserNotFoundException(HttpStatus.NOT_FOUND, "No lecturers found"));
         user.setUserName(oldUser.getUserName());
         user.setEmail(oldUser.getEmail());
         return user;
-    }
-
-    public void mailInput(String email, String subject, String text) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(email);
-        mailMessage.setSubject(subject);
-        mailMessage.setText(text);
-        emailSenderService.sendEmail(mailMessage);
     }
 }

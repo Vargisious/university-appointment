@@ -2,7 +2,7 @@ package com.purple.ua.universityappointment.security;
 
 import com.purple.ua.universityappointment.security.model.AuthenticationRequest;
 import com.purple.ua.universityappointment.security.util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,17 +10,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticationService {
 
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtils;
 
-    @Autowired
-    private JwtUtil jwtUtils;
-
-    @Autowired
-    private MyUserDetailsService userDetailsService;
+    private final MyUserDetailsService userDetailsService;
 
     public String parseAuthenticationRequest(AuthenticationRequest authenticationRequest) throws Exception {
         try {

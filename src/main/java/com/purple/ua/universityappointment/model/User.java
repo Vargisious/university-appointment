@@ -50,7 +50,7 @@ public class User {
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "lecturer")
     private List<Lesson> lessons;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "student")
     private List<Appointment> appointments;
 
     private boolean isEnabled;

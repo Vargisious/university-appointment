@@ -1,15 +1,13 @@
 package com.purple.ua.universityappointment.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -39,14 +37,17 @@ public class Lesson {
     @Column(name = "price_per_hour")
     private int price;
 
-    @ManyToOne( /*cascade = {CascadeType.DETACH,
-            CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.REFRESH}*/fetch = FetchType.EAGER)
+    @Column(name = "discount")
+    private double discount;
+
+    @Column(name = "discount_start")
+    private int discountStart;
+
+    @ManyToOne()
     @JoinColumn(name = "lecturer_id")
     private User lecturer;
 
-    @OneToMany(/*cascade = CascadeType.ALL,*/ mappedBy = "lesson")
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "lesson")
     private List<Appointment> appointment;
 
     @Column(name = "date_from")

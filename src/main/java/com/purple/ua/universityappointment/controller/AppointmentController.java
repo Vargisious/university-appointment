@@ -5,7 +5,7 @@ import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.Status;
 import com.purple.ua.universityappointment.security.MyUserDetails;
 import com.purple.ua.universityappointment.service.AppointmentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,11 +24,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/appointment")
+@RequiredArgsConstructor
 public class AppointmentController {
 
-
-    @Autowired
-    AppointmentService appointmentService;
+    private final AppointmentService appointmentService;
 
     @PreAuthorize("hasRole('ROLE_LECTURER')")
     @PutMapping("/status")
@@ -70,8 +69,9 @@ public class AppointmentController {
     }
 
     @PutMapping("/update")
-    ResponseEntity<AppointmentDto> updateAppointment(@RequestBody AppointmentDto appointmentDto) {
-        AppointmentDto appointment = appointmentService.updateAppointment(appointmentDto);
+    ResponseEntity<AppointmentDto> updateAppointment(@RequestBody AppointmentDto appointmentDto, @RequestParam
+            long lessonId) {
+        AppointmentDto appointment = appointmentService.updateAppointment(appointmentDto, lessonId);
         return new ResponseEntity<>(appointment, HttpStatus.OK);
     }
 

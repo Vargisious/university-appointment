@@ -24,14 +24,20 @@ public class LessonDto {
     @NotNull
     private int price;
 
+    @NotNull
+    private double discount;
+
+    @NotNull
+    private int discount_start;
+
     private UserDto lecturer;
 
     @NotNull
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime fromDate;
 
     @NotNull
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime toDate;
 
 }
