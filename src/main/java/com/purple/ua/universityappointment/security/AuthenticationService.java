@@ -1,8 +1,10 @@
 package com.purple.ua.universityappointment.security;
 
+import com.purple.ua.universityappointment.exception.WrongCredentialsException;
 import com.purple.ua.universityappointment.security.model.AuthenticationRequest;
 import com.purple.ua.universityappointment.security.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +26,7 @@ public class AuthenticationService {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(),
                     authenticationRequest.getPassword()));
         } catch (BadCredentialsException e) {
-            throw new Exception("Incorrect username or password");
+            throw new WrongCredentialsException(HttpStatus.UNAUTHORIZED, "Incorrect username or password");
         }
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(authenticationRequest.getUsername());

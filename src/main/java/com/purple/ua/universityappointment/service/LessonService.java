@@ -16,8 +16,6 @@ public interface LessonService {
 
     List<LessonDto> getLessonsByLecturerId(long id);
 
-    List<LessonDto> getLessonByFieldOfStudy(String name);
-
     LessonDto createLesson(LessonDto lessonDto, User user);
 
     LessonDto updateLesson(LessonDto lessonDto, User user);

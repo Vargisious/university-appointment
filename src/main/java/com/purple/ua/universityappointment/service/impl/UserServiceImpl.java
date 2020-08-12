@@ -122,10 +122,10 @@ public class UserServiceImpl implements UserService {
 
 
     public User userNameAndPasswordEnsure(User user) {
-        User oldUser = userRepository.findById(user.getId()).orElseThrow(
+        User fromDB = userRepository.findById(user.getId()).orElseThrow(
                 () -> new UserNotFoundException(HttpStatus.NOT_FOUND, "No lecturers found"));
-        user.setUserName(oldUser.getUserName());
-        user.setEmail(oldUser.getEmail());
+        user.setUserName(fromDB.getUserName());
+        user.setEmail(fromDB.getEmail());
         return user;
     }
 }

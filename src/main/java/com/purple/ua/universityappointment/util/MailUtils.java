@@ -1,8 +1,10 @@
 package com.purple.ua.universityappointment.util;
 
+import com.purple.ua.universityappointment.exception.EmailSendingException;
 import com.purple.ua.universityappointment.service.impl.EmailSenderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +25,8 @@ public class MailUtils {
         try {
             ip = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            throw new EmailSendingException(HttpStatus.FAILED_DEPENDENCY, "Failed sending email due to: "
+                    + e.getMessage());
         }
         return "https://" + ip + ":" + port;
     }

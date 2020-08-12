@@ -17,11 +17,11 @@ public class UserDto {
     private Long id;
 
     @NotNull
-    @Length(min = 2)
+    @Length(min = 2, message = "Field first name should have more than 1 character")
     private String firstName;
 
     @NotNull
-    @Length(min = 2)
+    @Length(min = 2, message = "Field last name should have more than 1 character")
     private String lastName;
 
     @Email(message = "Email address has invalid format: ${validatedValue}",
@@ -29,7 +29,7 @@ public class UserDto {
     private String email;
 
     @NotNull
-    @Length(min = 2, message = "User name should have more than 1 character  ")
+    @Length(min = 2, message = "Field username should have more than 1 character")
     private String userName;
 
     @Past
@@ -37,7 +37,7 @@ public class UserDto {
     private LocalDate birthday;
 
     @NotNull
-    @Length(min = 8)
+    @Length(min = 8, message = "Password should be at least 8 characters long")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
