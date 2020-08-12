@@ -47,7 +47,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Lesson lesson = lessonService.getLessonById(lessonId);
         LocalDateTime startTime = appointmentDto.getFromDate();
         LocalDateTime endTime = appointmentDto.getToDate();
-        timeCheck(lesson, startTime, endTime);
+        checkTime(lesson, startTime, endTime);
         if (appointmentRepository.findTimeOverlap(startTime, endTime, lessonId).isEmpty()) {
             long duration = Duration.between(startTime, endTime).toMinutes();
             AppointmentDto appointment = countPrice(lesson, duration, appointmentDto);
@@ -92,7 +92,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                         + appointmentDto.getId() + " not found"));
         LocalDateTime startTime = appointmentDto.getFromDate();
         LocalDateTime endTime = appointmentDto.getToDate();
-        timeCheck(lesson, startTime, endTime);
+        checkTime(lesson, startTime, endTime);
         if (appointmentRepository.findTimeOverlapExclude(startTime, endTime, lessonId, appointment.getId()).isEmpty()) {
             long duration = Duration.between(startTime, endTime).toMinutes();
             appointmentDto.setFinalPrice(countPrice(lesson, duration, appointmentDto).getFinalPrice());
@@ -151,7 +151,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return INSTANCE.toDto(save);
     }
 
-    public void timeCheck(Lesson lesson, LocalDateTime startTime, LocalDateTime endTime) {
+    public void checkTime(Lesson lesson, LocalDateTime startTime, LocalDateTime endTime) {
         if (!endTime.isAfter(startTime)) {
             throw new TimeConflictException(HttpStatus.CONFLICT, "DateFrom is after ToDate");
         }

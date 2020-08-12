@@ -18,7 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
-
 @RestController
 @RequiredArgsConstructor
 public class AuthenticationController {

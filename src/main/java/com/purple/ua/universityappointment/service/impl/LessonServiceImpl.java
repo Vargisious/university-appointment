@@ -63,16 +63,6 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public List<LessonDto> getLessonByFieldOfStudy(String name) {
-        List<Lesson> lessons = lessonRepository.findByFieldOfStudy(name);
-        if (!lessons.isEmpty()) {
-            return INSTANCE.listToDto(lessons);
-        } else {
-            throw new LessonNotFoundException(HttpStatus.NOT_FOUND, "Lesson with field of study: " + name + " not found");
-        }
-    }
-
-    @Override
     public LessonDto createLesson(LessonDto lessonDto, User user) {
         LocalDateTime fromDate = lessonDto.getFromDate();
         LocalDateTime toDate = lessonDto.getToDate();
