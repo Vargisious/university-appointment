@@ -1,25 +1,27 @@
 package com.purple.ua.universityappointment.service;
 
+import com.purple.ua.universityappointment.dto.UserDto;
+import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
 
-    Optional<com.purple.ua.universityappointment.model.User> getUserById(Long id);
+    UserDto getUser(long id) throws UserNotFoundException;
 
-    Optional<User> getUserByLogin(String login);
+    User getUserById(long id);
 
-    List<User> getAllLecturers();
+    List<UserDto> getAllLecturers();
 
-    List<User> getAllStudents();
+    List<UserDto> getAllStudents();
 
-    List<User> getAllUsers();
+    List<UserDto> getAllUsers();
 
-    User saveUser(User user);
+    UserDto saveUser(UserDto user);
 
-    User updateUser(User user);
+    UserDto updateUser(UserDto user);
 
-    User deleteUser(User user);
+    UserDto deleteUserById(long  id) throws UserNotFoundException;
+
 }

@@ -1,98 +1,131 @@
 package com.purple.ua.universityappointment.service.impl;
 
+import com.purple.ua.universityappointment.dto.UserDto;
+import com.purple.ua.universityappointment.exception.FieldAlreadyInUseException;
+import com.purple.ua.universityappointment.exception.UserNotFoundException;
 import com.purple.ua.universityappointment.model.ConfirmationToken;
 import com.purple.ua.universityappointment.model.User;
 import com.purple.ua.universityappointment.repository.ConfirmationTokenRepository;
 import com.purple.ua.universityappointment.repository.UserRepository;
 import com.purple.ua.universityappointment.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import com.purple.ua.universityappointment.util.MailUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.purple.ua.universityappointment.util.UserMapper.INSTANCE;
+import static com.purple.ua.universityappointment.util.mapper.UserMapper.INSTANCE;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final ConfirmationTokenRepository confirmationTokenRepository;
 
-    @Autowired
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private EmailSenderService emailSenderService;
+    private final MailUtils mailUtils;
 
     @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public UserDto getUser(long id) {
+        Optional<User> user = userRepository.findById(id);
+        return INSTANCE.toDto(user.orElseThrow(() ->
+                new UserNotFoundException(HttpStatus.NOT_FOUND, "User with id: " + id + " not found")));
     }
 
     @Override
-    public Optional<User> getUserByLogin(String login) {
-        return userRepository.findByLogin(login);
+    public User getUserById(long id) {
+        Optional<User> user = userRepository.findById(id);
+        return user.orElseThrow(() ->
+                new UserNotFoundException(HttpStatus.NOT_FOUND, "User with id: " + id + " not found"));
     }
 
     @Override
-    public List<User> getAllLecturers() {
-        return userRepository.findByRoles("lecturer");
+    public List<UserDto> getAllLecturers() {
+        List<User> users = userRepository.findAllLecturers();
+        if (!users.isEmpty()) {
+            return INSTANCE.listToDto(users);
+        } else {
+            throw new UserNotFoundException(HttpStatus.NOT_FOUND, "No lecturers found");
+        }
     }
 
     @Override
-    public List<User> getAllStudents() {
-        return userRepository.findByRoles("student");
+    public List<UserDto> getAllStudents() {
+        List<User> users = userRepository.findAllStudents();
+        if (!users.isEmpty()) {
+            return INSTANCE.listToDto(users);
+        } else {
+            throw new UserNotFoundException(HttpStatus.NOT_FOUND, "No students found");
+        }
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        if (!users.isEmpty()) {
+            return INSTANCE.listToDto(users);
+        }
+        throw new UserNotFoundException(HttpStatus.NOT_FOUND, "No users found");
     }
 
     @Override
-    public User saveUser(User user) {
-        String login = user.getLogin();
-        String email = user.getEmail();
-        if (userRepository.findByLogin(login).isPresent()) {
-            throw new RuntimeException(String.format("Login is alredy in use"));
+    public UserDto saveUser(UserDto userDto) {
+        String userName = userDto.getUserName();
+        String email = userDto.getEmail();
+        if (userRepository.findByUserName(userName).isPresent()) {
+            throw new FieldAlreadyInUseException(HttpStatus.CONFLICT, "Username " + userName + " is already in use");
         }
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException(String.format("Email is alredy in use"));
+            throw new FieldAlreadyInUseException(HttpStatus.CONFLICT, "Email " + email + " is already in use");
 
         } else {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            User user = INSTANCE.toEntity(userDto);
             User save = userRepository.save(user);
             ConfirmationToken confirmationToken = new ConfirmationToken(user);
 
             confirmationTokenRepository.save(confirmationToken);
 
-            SimpleMailMessage mailMessage = new SimpleMailMessage();
-            mailMessage.setTo(user.getEmail());
-            mailMessage.setSubject("Complete Registration!");
-            mailMessage.setFrom("anotherdayofbill2017@gmail.com");
-            mailMessage.setText("To confirm your account, please click here : "
-                    + "http://localhost:8082/confirm-account?token=" + confirmationToken.getConfirmationToken());
+            mailUtils.mailInput(userDto.getEmail(), "Complete Registration!"
+                    , "To confirm your account, please click here : "
+                            + mailUtils.getUrl() + "/confirm-account?token="
+                            + confirmationToken.getConfirmationToken());
 
-            emailSenderService.sendEmail(mailMessage);
-            return save;
+            return INSTANCE.toDto(save);
         }
     }
 
     @Override
-    public User updateUser(User user) {
-        userRepository.save(user);
-        return user;
+    public UserDto updateUser(UserDto userDto) {
+        User ensured = userNameAndPasswordEnsure(INSTANCE.toEntity(userDto));
+        User user = userRepository.save(ensured);
+        return INSTANCE.toDto(user);
     }
 
+
     @Override
-    public User deleteUser(User user) {
-        userRepository.delete(user);
+    public UserDto deleteUserById(long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException(HttpStatus.NOT_FOUND, "User with id: " + id + " not found"));
+        confirmationTokenRepository.deleteByUserId(id);
+        userRepository.deleteById(id);
+        return INSTANCE.toDto(user);
+    }
+
+
+    public User userNameAndPasswordEnsure(User user) {
+        User oldUser = userRepository.findById(user.getId()).orElseThrow(
+                () -> new UserNotFoundException(HttpStatus.NOT_FOUND, "No lecturers found"));
+        user.setUserName(oldUser.getUserName());
+        user.setEmail(oldUser.getEmail());
         return user;
     }
 }

@@ -1,23 +1,28 @@
 package com.purple.ua.universityappointment.service;
 
+import com.purple.ua.universityappointment.dto.LessonDto;
 import com.purple.ua.universityappointment.model.Lesson;
+import com.purple.ua.universityappointment.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface LessonService {
 
-    Optional<Lesson> getLessonById(long id);
+    LessonDto getLesson(long id);
 
-    List<Lesson> getLessonsByLecturerFirstNameAndLastName(String firstName, String secondName);
+    Lesson getLessonById(long id);
 
-    Lesson getLessonByLessonName(String name);
+    List<LessonDto> getAllLesson(User user);
 
-    Lesson createLesson(Lesson lesson);
+    List<LessonDto> getLessonsByLecturerId(long id);
 
-    Lesson updateLesson(Lesson lesson);
+    List<LessonDto> getLessonByFieldOfStudy(String name);
 
-    Lesson deleteLesson(Lesson lesson);
+    LessonDto createLesson(LessonDto lessonDto, User user);
+
+    LessonDto updateLesson(LessonDto lessonDto, User user);
+
+    LessonDto deleteLesson(long id);
 
 
 

@@ -1,6 +1,5 @@
 package com.purple.ua.universityappointment.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,10 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,22 +29,25 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "lesson_name")
-    private String lessonName;
+    @Column(name = "field_of_study")
+    private String fieldOfStudy;
 
     private Timestamp createdAt = new Timestamp(System.currentTimeMillis());
 
     @Column(name = "price_per_hour")
     private int price;
 
-    @ManyToOne(/*cascade = {CascadeType.DETACH,
-            CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.REFRESH}*/)
+    @Column(name = "discount")
+    private double discount;
+
+    @Column(name = "discount_start")
+    private int discountStart;
+
+    @ManyToOne()
     @JoinColumn(name = "lecturer_id")
     private User lecturer;
 
-    @OneToMany(/*cascade = CascadeType.ALL,*/ mappedBy = "lesson")
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "lesson")
     private List<Appointment> appointment;
 
     @Column(name = "date_from")

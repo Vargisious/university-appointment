@@ -5,16 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import java.sql.Time;
 import java.time.LocalDateTime;
 
 @Getter
@@ -28,19 +26,16 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne(/*cascade = {CascadeType.DETACH,
-            CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.REFRESH}*/)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private User student;
 
-    @Column(name = "available")
-    private boolean available;
+    @Column(name = "status")
+    private Status status;
 
     @Column(name = "date_from")
     private LocalDateTime fromDate;
@@ -49,6 +44,6 @@ public class Appointment {
     private LocalDateTime toDate;
 
     @Column(name = "final_price")
-    private int finalPrice;
+    private double finalPrice;
 
 }

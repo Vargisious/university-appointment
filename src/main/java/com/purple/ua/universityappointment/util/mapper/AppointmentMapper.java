@@ -1,4 +1,5 @@
-package com.purple.ua.universityappointment.util;
+package com.purple.ua.universityappointment.util.mapper;
+
 
 import com.purple.ua.universityappointment.dto.AppointmentDto;
 import com.purple.ua.universityappointment.model.Appointment;
@@ -17,4 +18,5 @@ public interface AppointmentMapper {
     List<AppointmentDto> listToDto(List<Appointment> appointments);
 
     AppointmentDto toDto(Appointment appointment);
+
 }

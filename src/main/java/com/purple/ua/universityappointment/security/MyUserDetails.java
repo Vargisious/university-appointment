@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class MyUserDetails implements UserDetails {
 
-private User user;
+    private User user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -31,7 +31,7 @@ private User user;
 
     @Override
     public String getUsername() {
-        return user.getLogin();
+        return user.getUserName();
     }
 
     @Override
@@ -52,5 +52,9 @@ private User user;
     @Override
     public boolean isEnabled() {
         return user.isEnabled();
+    }
+
+    public User getUser() {
+        return user;
     }
 }

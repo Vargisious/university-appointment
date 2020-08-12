@@ -1,4 +1,4 @@
-package com.purple.ua.universityappointment.util;
+package com.purple.ua.universityappointment.util.mapper;
 
 import com.purple.ua.universityappointment.dto.LessonDto;
 import com.purple.ua.universityappointment.model.Lesson;
@@ -7,7 +7,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface LessonMapper {
 
     LessonMapper INSTANCE = Mappers.getMapper(LessonMapper.class);
@@ -17,4 +17,5 @@ public interface LessonMapper {
     List<LessonDto> listToDto(List<Lesson> lessons);
 
     LessonDto toDto(Lesson lesson);
-}
+
+    }

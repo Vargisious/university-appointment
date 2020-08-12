@@ -1,6 +1,5 @@
 package com.purple.ua.universityappointment.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.time.LocalDate;
 import java.util.List;
@@ -38,7 +36,7 @@ public class User {
     private String email;
 
     @Column
-    private String login;
+    private String userName;
 
     @Column(name = "birthday")
     private LocalDate birthday;
@@ -49,13 +47,12 @@ public class User {
     @Column(name = "role")
     private String roles;
 
-    @OneToMany(/*cascade = CascadeType.ALL,*/mappedBy = "lecturer")
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "lecturer")
     private List<Lesson> lessons;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "student")
     private List<Appointment> appointments;
 
     private boolean isEnabled;
-
 
 }
